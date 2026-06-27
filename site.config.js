@@ -21,34 +21,27 @@ export default {
   // a link. Set `name: ""` to hide the sidebar entirely.
   profile: {
     name: "Breno do Nascimento",
-    tagline: "Cloud Engineer · AWS Certified · DevOps",
+    tagline: "",
     // Career start year. Rendered as a live "uptime" row in the sidebar.
     since: 2021,
     fields: [
-      { key: "role", value: "DevOps Engineer" },
-      { key: "location", value: "Brazil" },
-      { key: "focus", value: "AWS · Terraform · CI/CD" },
-      { key: "stack", value: "Laravel · Docker · Linux" },
-      { key: "certs", value: "AWS SAA-C03 · CLF-C02" },
-      {
-        key: "email",
-        value: "brenodonascimentosilvaa@gmail.com",
-        href: "mailto:brenodonascimentosilvaa@gmail.com",
-      },
-      { key: "github", value: "Breno30", href: "https://github.com/Breno30" },
+      { key: "github", value: "Github", href: "https://github.com/Breno30" },
       {
         key: "linkedin",
-        value: "breno",
+        value: "Linkedin",
         href: "https://linkedin.com/in/breno-do-nascimento-silva",
       },
+      { key: "role", value: "DevOps Engineer" },
+      { key: "location", value: "Brazil" },
+      { key: "stack", value: "AWS · Docker · Linux · CI/CD" },
+      { key: "certs", value: "AWS SAA-C03 · CLF-C02" },
     ],
   },
   // Optional external links rendered in the footer.
   links: [
-    { label: "github", href: "https://github.com/breno30" },
-    { label: "linkedin", href: "https://www.linkedin.com/in/breno-do-nascimento-silva/" },
+    { label: "Github", href: "https://github.com/breno30" },
+    { label: "Linkedin", href: "https://www.linkedin.com/in/breno-do-nascimento-silva/" },
     // phone: fill in the real number, e.g. "tel:+5511999999999"
-    { label: "phone", href: "tel:+0000000000" },
     { label: "rss", href: "/feed.xml" },
   ],
 };

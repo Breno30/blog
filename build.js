@@ -131,6 +131,11 @@ function buildSidebar(profile) {
       const val = f.href
         ? `<a href="${esc(f.href)}">${esc(f.value)}</a>`
         : esc(f.value);
+      // When the key would just repeat the value (e.g. github / Github), drop
+      // the key column and show the link on its own.
+      if (f.key && f.value && f.key.toLowerCase() === f.value.toLowerCase()) {
+        return `        <div class="pf-row pf-row--solo"><dd class="pf-val">${val}</dd></div>`;
+      }
       return `        <div class="pf-row"><dt class="pf-key">${esc(f.key)}</dt><dd class="pf-val">${val}</dd></div>`;
     })
     .join("\n");

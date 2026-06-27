@@ -276,6 +276,8 @@ a:hover { color: var(--accent); text-decoration: underline; }
 .pf-key::before { content: "› "; color: var(--accent); }
 .pf-key::after { content: ":"; }
 .pf-val { margin: 0; color: var(--fg); min-width: 0; overflow-wrap: anywhere; }
+/* Solo rows (no key) keep the terminal bullet on the value itself. */
+.pf-row--solo .pf-val::before { content: "› "; color: var(--accent); }
 .pf-val a { color: var(--link); }
 .pf-val a:hover { color: var(--accent); }
 
