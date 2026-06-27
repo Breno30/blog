@@ -1,4 +1,5 @@
 resource "aws_cloudfront_origin_access_control" "site" {
+  count                             = var.enable_cloudfront ? 1 : 0
   name                              = "${var.project_name}-oac"
   description                       = "OAC for ${local.bucket_name}"
   origin_access_control_origin_type = "s3"
@@ -7,6 +8,7 @@ resource "aws_cloudfront_origin_access_control" "site" {
 }
 
 resource "aws_cloudfront_function" "rewrite" {
+  count   = var.enable_cloudfront ? 1 : 0
   name    = "${var.project_name}-rewrite"
   runtime = "cloudfront-js-2.0"
   comment = "Rewrite pretty URLs to index.html"
@@ -20,7 +22,8 @@ data "aws_cloudfront_cache_policy" "optimized" {
 }
 
 resource "aws_cloudfront_response_headers_policy" "security" {
-  name = "${var.project_name}-security-headers"
+  count = var.enable_cloudfront ? 1 : 0
+  name  = "${var.project_name}-security-headers"
 
   security_headers_config {
     strict_transport_security {
@@ -52,6 +55,7 @@ resource "aws_cloudfront_response_headers_policy" "security" {
 }
 
 resource "aws_cloudfront_distribution" "site" {
+  count               = var.enable_cloudfront ? 1 : 0
   enabled             = true
   is_ipv6_enabled     = true
   comment             = var.project_name
@@ -63,7 +67,7 @@ resource "aws_cloudfront_distribution" "site" {
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
     origin_id                = "s3-site"
-    origin_access_control_id = aws_cloudfront_origin_access_control.site.id
+    origin_access_control_id = aws_cloudfront_origin_access_control.site[0].id
   }
 
   default_cache_behavior {
@@ -73,11 +77,11 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy     = "redirect-to-https"
     compress                   = true
     cache_policy_id            = data.aws_cloudfront_cache_policy.optimized.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security[0].id
 
     function_association {
       event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.rewrite.arn
+      function_arn = aws_cloudfront_function.rewrite[0].arn
     }
   }
 

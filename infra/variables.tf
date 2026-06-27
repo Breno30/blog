@@ -27,6 +27,20 @@ variable "subject_alternative_names" {
   default     = []
 }
 
+variable "enable_cloudfront" {
+  description = <<-EOT
+    Put CloudFront (CDN + HTTPS + security headers + pretty-URL rewrites) in
+    front of the bucket. When false, the site is served straight from an S3
+    static-website endpoint: a PUBLIC bucket, HTTP only, no CDN. This is the
+    simplest possible setup — good for getting started.
+
+    A custom domain and ACM certificate require CloudFront, so
+    enable_custom_domain is ignored while this is false.
+  EOT
+  type        = bool
+  default     = false
+}
+
 variable "enable_custom_domain" {
   description = <<-EOT
     Attach the custom domain + ACM cert to CloudFront.

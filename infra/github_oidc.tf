@@ -58,10 +58,14 @@ data "aws_iam_policy_document" "deploy" {
     resources = ["${aws_s3_bucket.site.arn}/*"]
   }
 
-  statement {
-    sid       = "Invalidate"
-    actions   = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"]
-    resources = [aws_cloudfront_distribution.site.arn]
+  # Only granted when CloudFront exists — nothing to invalidate otherwise.
+  dynamic "statement" {
+    for_each = var.enable_cloudfront ? [1] : []
+    content {
+      sid       = "Invalidate"
+      actions   = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"]
+      resources = [aws_cloudfront_distribution.site[0].arn]
+    }
   }
 }
 

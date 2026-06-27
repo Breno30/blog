@@ -13,7 +13,7 @@ output "acm_validation_records" {
 
 output "custom_domain_target" {
   description = "Point your domain's CNAME/ALIAS at this CloudFront hostname."
-  value       = aws_cloudfront_distribution.site.domain_name
+  value       = var.enable_cloudfront ? aws_cloudfront_distribution.site[0].domain_name : null
 }
 
 # ---- Values for GitHub Actions repo variables -----------------------------
@@ -24,8 +24,8 @@ output "s3_bucket_name" {
 }
 
 output "cloudfront_distribution_id" {
-  description = "DISTRIBUTION_ID repo variable for the deploy workflow."
-  value       = aws_cloudfront_distribution.site.id
+  description = "DISTRIBUTION_ID repo variable for the deploy workflow (null when CloudFront is disabled)."
+  value       = var.enable_cloudfront ? aws_cloudfront_distribution.site[0].id : null
 }
 
 output "deploy_role_arn" {
@@ -36,6 +36,11 @@ output "deploy_role_arn" {
 # ---- Handy ----------------------------------------------------------------
 
 output "cloudfront_url" {
-  description = "Default CloudFront URL (works before the custom domain is wired up)."
-  value       = "https://${aws_cloudfront_distribution.site.domain_name}"
+  description = "Default CloudFront URL (works before the custom domain is wired up). Null when CloudFront is disabled."
+  value       = var.enable_cloudfront ? "https://${aws_cloudfront_distribution.site[0].domain_name}" : null
+}
+
+output "s3_website_url" {
+  description = "Public S3 static-website URL. Used when CloudFront is disabled."
+  value       = var.enable_cloudfront ? null : "http://${aws_s3_bucket_website_configuration.site[0].website_endpoint}"
 }
