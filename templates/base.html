@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="{{lang}}" class="no-js">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{title}}</title>
+  <meta name="description" content="{{description}}" />
+  <meta name="author" content="{{author}}" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0a0e0a" />
+  {{head_extra}}
+  <!-- flip no-js -> js before paint so the terminal swaps in without flicker -->
+  <script>document.documentElement.classList.replace("no-js", "js");</script>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate" type="application/rss+xml" title="{{site_title}}" href="/feed.xml" />
+</head>
+<body>
+  <a class="skip" href="#main">skip to content</a>
+  <header class="term-header">
+    {{brand_html}}
+    <div id="terminal" class="terminal" data-author="{{author}}" data-resume="{{resume_url}}">
+      <!-- No-JS fallback: a completed command, not an empty input. -->
+      <div class="term-static">
+        <span class="term-prompt"><span class="user">{{author}}</span><span class="muted">@blog</span>:<span class="cwd">~</span><span class="muted">$</span></span>
+        <a class="cmd" href="/">cd ~</a>
+      </div>
+
+      <!-- Interactive terminal (shown when JS is on). -->
+      <div class="term-live" id="term-live">
+        <div class="term-output" id="term-output" aria-live="polite"></div>
+        <div class="term-line">
+          <div class="term-field" id="term-field">
+            <span class="term-prompt"><span class="user">{{author}}</span><span class="muted">@blog</span>:<span class="cwd">~</span><span class="muted">$</span></span>
+            <span class="term-typed" id="term-typed"></span><span class="term-hint" id="term-hint">type 'help' and press enter to get started</span><span class="cursor" aria-hidden="true">█</span><span class="term-ghost" id="term-ghost" aria-hidden="true"></span>
+            <input id="term-input" class="term-input" type="text"
+                   aria-label="run a command"
+                   autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="/">posts</a>
+      <a href="/about/">about</a>
+      <a href="{{resume_url}}" target="_blank" rel="noopener">resume</a>
+      <button type="button" class="nav-search" id="open-search" aria-haspopup="dialog">⌕ search</button>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <main id="main" class="main">
+      {{content}}
+    </main>
+    {{sidebar_html}}
+  </div>
+
+  <footer class="term-footer">
+    <span class="muted"># {{site_title}} — built {{year}}</span>
+    <span class="links">{{footer_links}}</span>
+  </footer>
+
+  <!-- Search modal (command palette). Opened by the nav button, "/", or ⌘/Ctrl+K. -->
+  <div class="modal" id="search-modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-window" role="dialog" aria-modal="true" aria-label="search posts">
+      <div class="win-bar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">search — ~/posts</span>
+        <button type="button" class="win-close" data-close aria-label="close search">esc</button>
+      </div>
+      <div class="win-body">
+        <div class="term-field" id="m-field">
+          <span class="term-prompt"><span class="user">search</span><span class="muted">:~$</span></span>
+          <span class="term-typed" id="m-typed"></span><span class="term-hint" id="m-hint">type to find a post…</span><span class="cursor" aria-hidden="true">█</span>
+          <input id="m-input" class="term-input" type="text" aria-label="search posts"
+                 autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        </div>
+        <ul class="term-results modal-results" id="m-results" role="listbox"></ul>
+      </div>
+      <div class="win-foot"><span class="muted">↑↓ navigate · ⇥ autocomplete · ↵ open · esc close</span></div>
+    </div>
+  </div>
+
+  <script id="posts-data" type="application/json">{{posts_json}}</script>
+  <script src="/terminal.js" defer></script>
+</body>
+</html>

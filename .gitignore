@@ -1,0 +1,20 @@
+# build output
+dist/
+
+# deps
+node_modules/
+
+# terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+!example.tfvars
+
+# os / editor
+.DS_Store
+*.log
+.idea/
+.vscode/
