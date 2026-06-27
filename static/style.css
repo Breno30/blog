@@ -209,7 +209,7 @@ a:hover { color: var(--accent); text-decoration: underline; }
   /* left sidebar | content filling and centered in the rest */
   .layout {
     display: grid;
-    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-columns: 360px minmax(0, 1fr);
     gap: 2.5rem;
     align-items: start;
   }
