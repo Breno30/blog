@@ -7,6 +7,10 @@ locals {
 
 resource "aws_s3_bucket" "site" {
   bucket = local.bucket_name
+
+  # Let `terraform destroy` empty the bucket (incl. all object versions) first.
+  # Safe here: the content is disposable — it's rebuilt from git on every deploy.
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_public_access_block" "site" {
