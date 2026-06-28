@@ -45,8 +45,11 @@ resource "aws_cloudfront_response_headers_policy" "security" {
     }
     # CSP is a managed security header — it must live here, not in
     # custom_headers_config (CloudFront rejects it as a custom header).
+    # The script-src sha256 is the hash of the inline "no-js -> js" flip
+    # in templates/base.html. If that one-liner changes, recompute with:
+    #   printf '%s' '<script body>' | openssl dgst -sha256 -binary | openssl base64
     content_security_policy {
-      content_security_policy = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+      content_security_policy = "default-src 'self'; script-src 'self' 'sha256-tlTtfpdsMQSdcfX3DLM1fgx/y++BLw+48vFj+5cTJa0='; img-src 'self' data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
       override                = true
     }
   }
