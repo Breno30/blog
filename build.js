@@ -2,6 +2,7 @@
 // No framework. Deps: markdown-it, markdown-it-anchor, gray-matter.
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import MarkdownIt from "markdown-it";
@@ -161,14 +162,49 @@ const writeFile = (rel, html) => {
   fs.writeFileSync(out, html);
 };
 
-const copyDir = (src, dest) => {
+// Assets emitted with a content-hashed filename so they can be cached forever
+// (the deploy marks non-HTML assets immutable). Editing one yields a new URL,
+// so browsers and CDNs fetch the update instead of serving a year-stale copy.
+const FINGERPRINT = new Set(["style.css", "terminal.js"]);
+
+// Map "/style.css" -> "/style.<hash>.css" for each fingerprinted static asset.
+function hashAssets() {
+  const map = {};
+  for (const name of FINGERPRINT) {
+    const src = path.join(STATIC, name);
+    if (!fs.existsSync(src)) continue;
+    const hash = crypto
+      .createHash("sha256")
+      .update(fs.readFileSync(src))
+      .digest("hex")
+      .slice(0, 8);
+    const ext = path.extname(name);
+    map[`/${name}`] = `/${name.slice(0, -ext.length)}.${hash}${ext}`;
+  }
+  return map;
+}
+
+// Rewrite "/style.css" -> "/style.<hash>.css" (etc.) throughout a string.
+const applyAssets = (s, map) =>
+  Object.entries(map).reduce((acc, [from, to]) => acc.split(from).join(to), s);
+
+// Copy static/ into dist/. Fingerprinted assets land under their hashed name;
+// .html files get their asset references rewritten to match; the rest is copied
+// verbatim.
+const copyStatic = (src, dest, map) => {
   if (!fs.existsSync(src)) return;
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
     const s = path.join(src, entry.name);
-    const d = path.join(dest, entry.name);
-    if (entry.isDirectory()) copyDir(s, d);
-    else fs.copyFileSync(s, d);
+    if (entry.isDirectory()) {
+      copyStatic(s, path.join(dest, entry.name), map);
+    } else if (map[`/${entry.name}`]) {
+      fs.copyFileSync(s, path.join(dest, path.basename(map[`/${entry.name}`])));
+    } else if (entry.name.endsWith(".html")) {
+      fs.writeFileSync(path.join(dest, entry.name), applyAssets(read(s), map));
+    } else {
+      fs.copyFileSync(s, path.join(dest, entry.name));
+    }
   }
 };
 
@@ -198,7 +234,10 @@ function build() {
   fs.rmSync(DIST, { recursive: true, force: true });
   fs.mkdirSync(DIST, { recursive: true });
 
-  const base = read(path.join(TEMPLATES, "base.html"));
+  // Content-hash style.css/terminal.js, then point the layout at the hashed
+  // URLs so the immutable cache headers are honest.
+  const assets = hashAssets();
+  const base = applyAssets(read(path.join(TEMPLATES, "base.html")), assets);
   const postTpl = read(path.join(TEMPLATES, "post.html"));
   const indexTpl = read(path.join(TEMPLATES, "index.html"));
 
@@ -337,8 +376,8 @@ function build() {
   writeSitemap(posts, pages);
   writeRobots();
 
-  // static assets
-  copyDir(STATIC, DIST);
+  // static assets (style.css/terminal.js emitted under hashed names)
+  copyStatic(STATIC, DIST, assets);
 
   console.log(
     `built ${posts.length} post(s) -> dist/  (url: ${site.url})`
