@@ -278,6 +278,10 @@
         if (sel && String(sel).length) return;
         input.focus({ preventScroll: true });
       });
+    } else if (hint) {
+      // Touch devices: don't shove a keyboard at people who can't easily type
+      // commands. Point them at the tappable post list instead.
+      hint.textContent = "↓ tap a post below to read";
     }
   })();
 

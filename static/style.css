@@ -437,6 +437,42 @@ body.modal-open { overflow: hidden; }
 .term-footer .links a { color: var(--fg-dim); }
 .term-footer .links a:hover { color: var(--accent); }
 
+/* touch devices: no hover to reveal links, so make taps obvious ---------- */
+@media (hover: none) {
+  /* Each post becomes a full-width, clearly tappable row: date on top,
+     title below as a big block link — no hover needed to tell it's a link. */
+  .ls li {
+    flex-wrap: wrap;
+    gap: 0.1rem 0.6rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .ls-date { font-size: 0.85rem; }
+  .ls-title { flex-basis: 100%; }
+  .ls-title a {
+    display: block;
+    padding: 0.2rem 0;
+    color: var(--accent);            /* bright = unmistakably interactive */
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-underline-offset: 3px;
+  }
+  .ls-title a::before { content: "› "; color: var(--fg-dim); }
+
+  /* Roomier nav chips so they're easy to hit with a thumb. */
+  .nav a,
+  .nav-search { padding: 0.6rem 1.05rem; }
+}
+
+/* phone widths: tighten margins, fit code/ASCII before sideways scroll --- */
+@media (max-width: 600px) {
+  body { padding: 1.25rem 1rem 3rem; }
+  .ls-title { font-size: 1.1rem; }
+  .nav a,
+  .nav-search { font-size: 1rem; }
+  .post-body pre { padding: 0.8rem; font-size: 0.82rem; }
+}
+
 /* respect reduced motion ------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   .cursor { animation: none; }
