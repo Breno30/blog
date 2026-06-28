@@ -322,8 +322,9 @@ function build() {
   const rows = posts
     .map(
       (p) =>
-        `<li><span class="ls-date">${fmtDate(p.date)}</span> ` +
-        `<h2 class="ls-title"><a href="/posts/${p.slug}/">${esc(p.title)}</a></h2></li>`
+        `<li><a class="ls-link" href="/posts/${p.slug}/">` +
+        `<h2 class="ls-title">${esc(p.title)}</h2>` +
+        `<span class="ls-date">${fmtDate(p.date)}</span></a></li>`
     )
     .join("\n");
   const indexBody = render(indexTpl, {

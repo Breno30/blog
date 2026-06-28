@@ -373,12 +373,26 @@ body.modal-open { overflow: hidden; }
   border-radius: 3px;
 }
 .ls { list-style: none; padding: 0; margin: 0; }
-.ls li { padding: 0.3rem 0; display: flex; gap: 1rem; align-items: baseline; }
+.ls li { padding: 0; }
+/* the whole row (title + date) is one block link, so hover/focus highlights both */
+.ls-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.45rem 0.6rem;
+  margin: 0 -0.6rem;            /* let the highlight bleed past the text without shifting it */
+  border-radius: 4px;
+  color: var(--fg);
+  text-decoration: none;
+  transition: background 0.12s ease;
+}
+.ls-link:hover,
+.ls-link:focus-visible { background: var(--border); }
+.ls-link:hover .ls-title,
+.ls-link:focus-visible .ls-title { color: var(--accent); }
 .ls-date { color: var(--fg-dim); font-variant-numeric: tabular-nums; }
 /* post titles in the listing are <h2> but should read like inline links */
 .ls-title { margin: 0; font-size: 1.2rem; font-weight: 400; line-height: inherit; }
-.ls a, .ls-title a { color: var(--fg); }
-.ls a:hover, .ls-title a:hover { color: var(--accent); }
 
 /* post ------------------------------------------------------------------ */
 .post-title {
@@ -439,25 +453,18 @@ body.modal-open { overflow: hidden; }
 
 /* touch devices: no hover to reveal links, so make taps obvious ---------- */
 @media (hover: none) {
-  /* Each post becomes a full-width, clearly tappable row: date on top,
-     title below as a big block link — no hover needed to tell it's a link. */
-  .ls li {
-    flex-wrap: wrap;
-    gap: 0.1rem 0.6rem;
-    padding: 0.7rem 0;
-    border-bottom: 1px dashed var(--border);
-  }
+  /* The whole row (title + date) is one full-width, clearly tappable block
+     link — title bright so no hover is needed to tell it's interactive. */
+  .ls li { border-bottom: 1px dashed var(--border); }
+  .ls-link { padding: 0.7rem 0.6rem; }
   .ls-date { font-size: 0.85rem; }
-  .ls-title { flex-basis: 100%; }
-  .ls-title a {
-    display: block;
-    padding: 0.2rem 0;
+  .ls-title {
     color: var(--accent);            /* bright = unmistakably interactive */
     text-decoration: underline;
     text-decoration-color: var(--border);
     text-underline-offset: 3px;
   }
-  .ls-title a::before { content: "› "; color: var(--fg-dim); }
+  .ls-title::before { content: "› "; color: var(--fg-dim); }
 
   /* Roomier nav chips so they're easy to hit with a thumb. */
   .nav a,
