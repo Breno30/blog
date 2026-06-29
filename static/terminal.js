@@ -11,6 +11,8 @@
   var terminalEl = document.getElementById("terminal");
   var author = (terminalEl && terminalEl.dataset.author) || "visitor";
   var resumeUrl = (terminalEl && terminalEl.dataset.resume) || "/resume.pdf";
+  // Set by initSearch; lets the header terminal open the search modal too.
+  var openSearch = null;
 
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) {
@@ -228,6 +230,10 @@
 
     input.addEventListener("input", refresh);
     input.addEventListener("keydown", function (e) {
+      // "/" on an empty prompt opens search; mid-command it types normally.
+      if (e.key === "/" && input.value === "" && openSearch) {
+        e.preventDefault(); openSearch(); return;
+      }
       if (e.key === "Tab") { e.preventDefault(); complete(); refresh(); return; }
       if (e.key === "Enter") {
         e.preventDefault();
@@ -382,6 +388,7 @@
       modal.hidden = true;
       document.body.classList.remove("modal-open");
     }
+    openSearch = open; // expose to the header terminal ("/" on empty prompt)
 
     input.addEventListener("input", refresh);
     input.addEventListener("keydown", function (e) {
