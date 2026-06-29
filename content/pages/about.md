@@ -20,10 +20,5 @@ The source lives in a git repo and ships on every push to `main`.
 $ cat ~/.contacts
 ```
 
-- **github** — [github.com/breno30](https://github.com/breno30)
+- **github** — [breno30](https://github.com/breno30)
 - **linkedin** — [breno-do-nascimento-silva](https://www.linkedin.com/in/breno-do-nascimento-silva/)
-- **phone** — [+00 000 000 0000](tel:+0000000000)
-
-- **Stack:** Node build script, Terraform, GitHub Actions (OIDC).
-- **Cost:** roughly nothing.
-- **Contact:** edit this page in `content/pages/about.md`.
