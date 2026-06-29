@@ -39,12 +39,6 @@ GitHub's webhook settings. Done.
 ngrok is a development tunnel, not production plumbing. It's perfect for a desk
 toy — zero infra, instant public URL — but it's not how I'd ship this for real.
 
-If I productionized it, GitHub would POST to an **API Gateway** endpoint backed
-by a **Lambda**, which publishes to **AWS IoT Core** over MQTT; the ESP32
-subscribes and reacts. That swaps the fragile tunnel for a managed,
-authenticated, always-on event pipeline — and conveniently it's the same
-serverless toolkit I use for everything else.
-
 ## Why I built it
 
 Event-driven systems are the backbone of modern infrastructure — webhooks,
