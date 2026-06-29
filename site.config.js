@@ -25,15 +25,33 @@ export default {
     // Career start year. Rendered as a live "uptime" row in the sidebar.
     since: 2021,
     fields: [
-      { key: "github", value: "Github", href: "https://github.com/Breno30" },
-      {
-        key: "linkedin",
-        value: "Linkedin",
-        href: "https://linkedin.com/in/breno-do-nascimento-silva",
-      },
       { key: "role", value: "DevOps Engineer" },
+      {
+        key: "contact",
+        stack: true,
+        parts: [
+          { value: "Github", href: "https://github.com/Breno30" },
+          {
+            value: "Linkedin",
+            href: "https://linkedin.com/in/breno-do-nascimento-silva",
+          },
+        ],
+      },
       { key: "location", value: "Brazil" },
-      { key: "certs", value: "AWS SAA-C03 · CLF-C02" },
+      {
+        key: "certs",
+        stack: true,
+        parts: [
+          {
+            value: "AWS SAA-C03",
+            href: "https://www.credly.com/badges/56523630-0522-4b50-b58d-92c3bce0031a/public_url",
+          },
+          {
+            value: "AWS CLF-C02",
+            href: "https://www.credly.com/badges/b2dd5a42-7b49-4f80-b0aa-d3e06fce2ec1/public_url",
+          },
+        ],
+      },
     ],
   },
   // Optional external links rendered in the footer.

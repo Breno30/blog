@@ -157,11 +157,15 @@ function buildSidebar(profile) {
     const years = new Date().getFullYear() - p.since;
     fields.push({ key: "uptime", value: `${years} years` });
   }
+  const link = (value, href) =>
+    href ? `<a href="${esc(href)}">${esc(value)}</a>` : esc(value);
   const rows = fields
     .map((f) => {
-      const val = f.href
-        ? `<a href="${esc(f.href)}">${esc(f.value)}</a>`
-        : esc(f.value);
+      // `parts` renders several links/values on one row, joined by " · "
+      // (or stacked one per line when `stack` is set).
+      const val = Array.isArray(f.parts)
+        ? f.parts.map((pt) => link(pt.value, pt.href)).join(f.stack ? "<br>" : " · ")
+        : link(f.value, f.href);
       // When the key would just repeat the value (e.g. github / Github), drop
       // the key column and show the link on its own.
       if (f.key && f.value && f.key.toLowerCase() === f.value.toLowerCase()) {
