@@ -247,10 +247,10 @@ const copyStatic = (src, dest, map) => {
 
 // Optimize listing thumbnails: every raster source in static/thumbs/ is
 // center-cropped to a square and re-encoded as a small WebP (a 64px box needs
-// ~192px even at 3x DPR), written to dist/thumbs/<name>.webp. SVGs and anything
+// ~109px even at 3x DPR), written to dist/thumbs/<name>.webp. SVGs and anything
 // non-raster are copied through untouched. Posts reference the emitted path
 // (e.g. thumb: /thumbs/git-watcher.webp).
-const THUMB_PX = 192;
+const THUMB_PX = 109;
 const RASTER = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif", ".tiff"]);
 async function optimizeThumbs() {
   if (!fs.existsSync(THUMBS_SRC)) return 0;
