@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import MarkdownIt from "markdown-it";
 import anchor from "markdown-it-anchor";
+import sharp from "sharp";
 import site from "./site.config.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -217,15 +218,22 @@ function hashAssets() {
 const applyAssets = (s, map) =>
   Object.entries(map).reduce((acc, [from, to]) => acc.split(from).join(to), s);
 
+// Source thumbnails live here at any size/format; optimizeThumbs() emits the
+// resized WebP the listing actually serves. copyStatic skips this dir so the
+// heavy originals never reach dist/.
+const THUMBS_SRC = path.join(STATIC, "thumbs");
+
 // Copy static/ into dist/. Fingerprinted assets land under their hashed name;
 // .html files get their asset references rewritten to match; the rest is copied
-// verbatim.
+// verbatim. The thumbs/ source dir is handled separately by optimizeThumbs().
 const copyStatic = (src, dest, map) => {
   if (!fs.existsSync(src)) return;
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
     const s = path.join(src, entry.name);
-    if (entry.isDirectory()) {
+    if (s === THUMBS_SRC) {
+      continue; // optimized into dist/thumbs/ by optimizeThumbs()
+    } else if (entry.isDirectory()) {
       copyStatic(s, path.join(dest, entry.name), map);
     } else if (map[`/${entry.name}`]) {
       fs.copyFileSync(s, path.join(dest, path.basename(map[`/${entry.name}`])));
@@ -236,6 +244,36 @@ const copyStatic = (src, dest, map) => {
     }
   }
 };
+
+// Optimize listing thumbnails: every raster source in static/thumbs/ is
+// center-cropped to a square and re-encoded as a small WebP (a 64px box needs
+// ~192px even at 3x DPR), written to dist/thumbs/<name>.webp. SVGs and anything
+// non-raster are copied through untouched. Posts reference the emitted path
+// (e.g. thumb: /thumbs/git-watcher.webp).
+const THUMB_PX = 192;
+const RASTER = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif", ".tiff"]);
+async function optimizeThumbs() {
+  if (!fs.existsSync(THUMBS_SRC)) return 0;
+  const dest = path.join(DIST, "thumbs");
+  fs.mkdirSync(dest, { recursive: true });
+  let n = 0;
+  for (const entry of fs.readdirSync(THUMBS_SRC, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    const src = path.join(THUMBS_SRC, entry.name);
+    const ext = path.extname(entry.name).toLowerCase();
+    if (RASTER.has(ext)) {
+      const base = entry.name.slice(0, -ext.length);
+      await sharp(src)
+        .resize(THUMB_PX, THUMB_PX, { fit: "cover", position: "centre" })
+        .webp({ quality: 80, effort: 6 })
+        .toFile(path.join(dest, `${base}.webp`));
+      n++;
+    } else {
+      fs.copyFileSync(src, path.join(dest, entry.name)); // svg, etc.
+    }
+  }
+  return n;
+}
 
 // --- load markdown documents ---------------------------------------------
 function loadDocs(dir) {
@@ -259,7 +297,7 @@ function loadDocs(dir) {
 }
 
 // --- build ----------------------------------------------------------------
-function build() {
+async function build() {
   fs.rmSync(DIST, { recursive: true, force: true });
   fs.mkdirSync(DIST, { recursive: true });
 
@@ -412,8 +450,11 @@ function build() {
   // static assets (style.css/terminal.js emitted under hashed names)
   copyStatic(STATIC, DIST, assets);
 
+  // listing thumbnails: resize + re-encode to WebP under dist/thumbs/
+  const thumbs = await optimizeThumbs();
+
   console.log(
-    `built ${posts.length} post(s) -> dist/  (url: ${site.url})`
+    `built ${posts.length} post(s), ${thumbs} thumb(s) -> dist/  (url: ${site.url})`
   );
   return posts.length;
 }
@@ -485,5 +526,8 @@ export { build };
 
 // Run the build when invoked directly (`node build.js`), not when imported.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  build();
+  build().catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  });
 }

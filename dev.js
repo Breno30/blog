@@ -13,16 +13,16 @@ const PORT = process.env.PORT || 8000;
 // Directories + files that should trigger a rebuild when they change.
 const WATCH = ["content", "templates", "static", "site.config.js", "build.js"];
 
-function safeBuild(reason) {
+async function safeBuild(reason) {
   try {
-    build();
+    await build();
     if (reason) console.log(`  ↳ rebuilt (${reason})`);
   } catch (err) {
     console.error("build failed:\n", err.message);
   }
 }
 
-safeBuild();
+await safeBuild();
 serve(PORT);
 
 // Debounce bursts of fs events (editors often fire several per save).
