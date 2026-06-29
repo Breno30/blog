@@ -33,7 +33,6 @@ export default {
       },
       { key: "role", value: "DevOps Engineer" },
       { key: "location", value: "Brazil" },
-      { key: "stack", value: "AWS · Docker · Linux · CI/CD" },
       { key: "certs", value: "AWS SAA-C03 · CLF-C02" },
     ],
   },
