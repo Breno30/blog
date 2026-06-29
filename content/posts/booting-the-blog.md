@@ -2,6 +2,7 @@
 title: Booting the blog
 date: 2026-06-26
 slug: booting-the-blog
+thumb: /thumbs/booting-the-blog.svg
 tags: [meta, aws, security, cloudfront]
 summary: First boot. How this blog is built, shipped, and locked down — static HTML on a private S3 bucket behind CloudFront.
 draft: false

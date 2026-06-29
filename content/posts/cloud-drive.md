@@ -2,6 +2,7 @@
 title: Cloud Drive — serverless file storage on AWS
 date: 2026-03-13
 slug: cloud-drive
+thumb: /thumbs/cloud-drive.png
 tags: [aws, terraform, serverless, cognito]
 summary: A Dropbox-lite with no servers — Cognito auth, S3 storage, a Lambda API, and CloudFront, all provisioned with Terraform.
 draft: false

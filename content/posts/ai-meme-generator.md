@@ -2,6 +2,7 @@
 title: An AI meme generator on AWS Bedrock
 date: 2025-06-29
 slug: ai-meme-generator
+thumb: /thumbs/ai-meme-generator.jpg
 tags: [aws, bedrock, serverless, ai]
 summary: Wiring generative AI into a serverless app — a Python Lambda calls Claude 3 Haiku on Bedrock to caption memes, no GPUs required.
 draft: false

@@ -2,6 +2,7 @@
 title: Git-Watcher — GitHub activity on an ESP32
 date: 2024-08-25
 slug: git-watcher
+thumb: /thumbs/git-watcher.png
 tags: [hardware, esp32, webhooks, github]
 summary: A desk gadget that reacts to GitHub webhooks — ESP32, C++, and a webhook tunnel that turns repo events into something you can see.
 draft: false

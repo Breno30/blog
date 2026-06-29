@@ -48,6 +48,35 @@ const esc = (s) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
+// A deterministic block-art "thumb" for a post: a 5x5 left-right-mirrored pixel
+// sprite (GitHub-identicon style) seeded by the slug and drawn in phosphor
+// block characters. Used as the fallback when a post has no real `thumb` photo,
+// so the listing still looks intentional. Stable across builds; each cell is
+// two chars wide so the pixels read roughly square in a monospace grid.
+function thumbArt(seed) {
+  const h = crypto.createHash("sha256").update(String(seed)).digest();
+  const rows = [];
+  for (let y = 0; y < 5; y++) {
+    const cells = [h[y * 3] & 1, h[y * 3 + 1] & 1, h[y * 3 + 2] & 1];
+    const mirrored = [cells[0], cells[1], cells[2], cells[1], cells[0]];
+    rows.push(mirrored.map((on) => (on ? "██" : "  ")).join(""));
+  }
+  return rows.join("\n");
+}
+
+// Listing thumbnail for a post. A real photo when the post sets `thumb:` in its
+// frontmatter (path served from static/, e.g. /thumbs/cloud-drive.jpg);
+// otherwise the generated sprite above. Both share the framed `.ls-thumb` box.
+function thumbHtml(p) {
+  if (p.thumb) {
+    return (
+      `<img class="ls-thumb ls-thumb--photo" src="${esc(p.thumb)}"` +
+      ` alt="" loading="lazy" decoding="async" width="64" height="64" />`
+    );
+  }
+  return `<pre class="ls-thumb" aria-hidden="true">${thumbArt(p.slug)}</pre>`;
+}
+
 // --- SEO helpers ----------------------------------------------------------
 const SITE_URL = (site.url || "").replace(/\/$/, "");
 const absUrl = (p) => (/^https?:\/\//.test(p) ? p : SITE_URL + p);
@@ -323,8 +352,11 @@ function build() {
     .map(
       (p) =>
         `<li><a class="ls-link" href="/posts/${p.slug}/">` +
+        thumbHtml(p) +
+        `<span class="ls-meta">` +
         `<h2 class="ls-title">${esc(p.title)}</h2>` +
-        `<span class="ls-date">${fmtDate(p.date)}</span></a></li>`
+        `<span class="ls-date">${fmtDate(p.date)}</span>` +
+        `</span></a></li>`
     )
     .join("\n");
   const indexBody = render(indexTpl, {
