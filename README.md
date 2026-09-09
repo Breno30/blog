@@ -36,6 +36,7 @@ slug: my-post        # optional; defaults to filename
 tags: [aws, notes]
 summary: One-line description for RSS.
 draft: false         # true hides it from the build
+show_thumb: true     # false hides the thumb on the single-post page
 ---
 
 Body in **markdown**.

@@ -78,6 +78,21 @@ function thumbHtml(p) {
   return `<pre class="ls-thumb" aria-hidden="true">${thumbArt(p.slug)}</pre>`;
 }
 
+// Full-width image for a single post. Raster listing thumbnails are emitted as
+// larger, aspect-ratio-preserving images under /post-images/ during the build.
+function postHeroHtml(p) {
+  if (!p.thumb || p.show_thumb === false) return "";
+  const ext = path.extname(p.thumb).toLowerCase();
+  const src = RASTER.has(ext)
+    ? `/post-images/${path.basename(p.thumb, ext)}.webp`
+    : p.thumb;
+  return (
+    `<figure class="post-hero">` +
+    `<img src="${esc(src)}" alt="" decoding="async" fetchpriority="high" />` +
+    `</figure>`
+  );
+}
+
 // --- SEO helpers ----------------------------------------------------------
 const SITE_URL = (site.url || "").replace(/\/$/, "");
 const absUrl = (p) => (/^https?:\/\//.test(p) ? p : SITE_URL + p);
@@ -249,17 +264,16 @@ const copyStatic = (src, dest, map) => {
   }
 };
 
-// Optimize listing thumbnails: every raster source in static/thumbs/ is
-// center-cropped to a square and re-encoded as a small WebP (a 64px box needs
-// ~109px even at 3x DPR), written to dist/thumbs/<name>.webp. SVGs and anything
-// non-raster are copied through untouched. Posts reference the emitted path
-// (e.g. thumb: /thumbs/git-watcher.webp).
+// Optimize thumbnails for both uses: a small square listing image under
+// /thumbs/ and an aspect-ratio-preserving single-post image under /post-images/.
 const THUMB_PX = 109;
 const RASTER = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif", ".tiff"]);
 async function optimizeThumbs() {
   if (!fs.existsSync(THUMBS_SRC)) return 0;
   const dest = path.join(DIST, "thumbs");
+  const postDest = path.join(DIST, "post-images");
   fs.mkdirSync(dest, { recursive: true });
+  fs.mkdirSync(postDest, { recursive: true });
   let n = 0;
   for (const entry of fs.readdirSync(THUMBS_SRC, { withFileTypes: true })) {
     if (!entry.isFile()) continue;
@@ -271,6 +285,10 @@ async function optimizeThumbs() {
         .resize(THUMB_PX, THUMB_PX, { fit: "cover", position: "centre" })
         .webp({ quality: 80, effort: 6 })
         .toFile(path.join(dest, `${base}.webp`));
+      await sharp(src)
+        .resize({ width: 1200, withoutEnlargement: true })
+        .webp({ quality: 82, effort: 6 })
+        .toFile(path.join(postDest, `${base}.webp`));
       n++;
     } else {
       fs.copyFileSync(src, path.join(dest, entry.name)); // svg, etc.
@@ -367,6 +385,7 @@ async function build() {
     const body = render(postTpl, {
       title: esc(p.title),
       meta,
+      hero: postHeroHtml(p),
       content: p.html,
     });
     writeFile(
@@ -427,6 +446,7 @@ async function build() {
     const body = render(postTpl, {
       title: esc(pg.title),
       meta: "",
+      hero: "",
       content: pg.html,
     });
     writeFile(

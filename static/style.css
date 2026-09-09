@@ -450,6 +450,19 @@ body.modal-open { overflow: hidden; }
 .post-meta { margin: 0 0 2rem; font-size: 0.9rem; }
 .tag { color: var(--amber); font-size: 0.85rem; }
 
+.post-hero {
+  margin: 0 0 2rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+.post-hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .post-body h2, .post-body h3 { color: var(--amber); margin-top: 2rem; }
 .post-body h2::before { content: "## "; color: var(--fg-dim); }
 .post-body h3::before { content: "### "; color: var(--fg-dim); }

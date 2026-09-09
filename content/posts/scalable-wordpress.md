@@ -3,6 +3,7 @@ title: Scalable WordPress on AWS
 date: 2026-09-08
 slug: scalable-wordpress
 thumb: /thumbs/scalable-wordpress.webp
+show_thumb: true
 tags: [aws, terraform, wordpress, architecture]
 summary: Rebuilding WordPress as a multi-tier AWS stack with private compute, shared storage, managed data services, load balancing, and Auto Scaling.
 draft: false
