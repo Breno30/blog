@@ -80,9 +80,6 @@ WordPress deployment:
 - **CloudWatch Agent** ships Nginx logs and basic memory/disk metrics.
 - **ALB health checks** use a dedicated `/healthz` endpoint.
 
-That does not make it a finished production platform by itself. It does mean
-the baseline chooses resilience over the cheapest possible demo.
-
 ## Bootstrapping instead of configuring by hand
 
 The launch template renders a user-data script that installs and configures the
