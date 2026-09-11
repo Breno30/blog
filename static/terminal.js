@@ -1,5 +1,5 @@
-// Header command terminal + search modal (command palette).
-// Progressive enhancement: with no JS, the static prompt + nav links remain.
+// Header search + optional command terminal.
+// Progressive enhancement: with no JS, the nav links and post list remain.
 (function () {
   var dataEl = document.getElementById("posts-data");
   var posts = [];
@@ -11,7 +11,7 @@
   var terminalEl = document.getElementById("terminal");
   var author = (terminalEl && terminalEl.dataset.author) || "visitor";
   var resumeUrl = (terminalEl && terminalEl.dataset.resume) || "/resume.pdf";
-  // Set by initSearch; lets the header terminal open the search modal too.
+  // Set by initSearch; lets the command terminal focus the header search too.
   var openSearch = null;
 
   function esc(s) {
@@ -72,8 +72,10 @@
   // Header command terminal
   // ======================================================================
   (function initTerminal() {
+    var modal = document.getElementById("command-modal");
     var input = document.getElementById("term-input");
     if (!input) return;
+    var openBtn = document.getElementById("open-command");
     var typed = document.getElementById("term-typed");
     var hint = document.getElementById("term-hint");
     var ghost = document.getElementById("term-ghost");
@@ -84,6 +86,18 @@
 
     var history = [];
     var hpos = -1;
+
+    function open() {
+      if (!modal || !modal.hidden) return;
+      modal.hidden = false;
+      document.body.classList.add("modal-open");
+      setTimeout(function () { input.focus({ preventScroll: true }); }, 0);
+    }
+    function close() {
+      if (!modal) return;
+      modal.hidden = true;
+      document.body.classList.remove("modal-open");
+    }
 
     function print(html, cls) {
       var div = document.createElement("div");
@@ -117,12 +131,13 @@
 
     var commands = {
       help: function () {
-        print("<span class='muted'>press <b>/</b> or the <b>⌕ search</b> button to search posts</span>");
+        print("<span class='muted'>use the header search bar, <b>/</b>, or <b>ctrl+k</b> to find posts</span>");
         print("commands:");
         print("&nbsp;&nbsp;<b>ls</b>            list posts");
         print("&nbsp;&nbsp;<b>cd</b> &lt;post&gt;     open a post (slug or title)");
         print("&nbsp;&nbsp;<b>about</b>         about / whoami");
         print("&nbsp;&nbsp;<b>resume</b>        open my resume (pdf)");
+        print("&nbsp;&nbsp;<b>search</b>        focus the search bar");
         print("&nbsp;&nbsp;<b>rss</b>           the feed");
         print("&nbsp;&nbsp;<b>clear</b>         clear the screen");
         print("<span class='muted'>tab completes · ↑/↓ history</span>");
@@ -150,6 +165,7 @@
         window.open(resumeUrl, "_blank", "noopener");
       },
       whoami: function () { print(author); },
+      search: function () { close(); if (openSearch) openSearch(); },
       rss: function () { go("/feed.xml"); },
       feed: function () { go("/feed.xml"); },
       home: function () { go("/"); },
@@ -176,7 +192,7 @@
     }
 
     // ---- Tab autocomplete (commands + post titles) ----
-    var COMMAND_NAMES = ["help", "ls", "cd", "about", "resume", "rss", "clear", "whoami", "home"];
+    var COMMAND_NAMES = ["help", "ls", "cd", "about", "resume", "search", "rss", "clear", "whoami", "home"];
     var ARG_COMMANDS = { cd: 1, open: 1, cat: 1 };
 
     function completionsFor(value) {
@@ -232,8 +248,9 @@
     input.addEventListener("keydown", function (e) {
       // "/" on an empty prompt opens search; mid-command it types normally.
       if (e.key === "/" && input.value === "" && openSearch) {
-        e.preventDefault(); openSearch(); return;
+        e.preventDefault(); close(); openSearch(); return;
       }
+      if (e.key === "Escape") { e.preventDefault(); close(); return; }
       if (e.key === "Tab") { e.preventDefault(); complete(); refresh(); return; }
       if (e.key === "Enter") {
         e.preventDefault();
@@ -261,47 +278,25 @@
     field.addEventListener("click", function () { input.focus(); });
     refresh();
 
-    // Desktop only — don't force the on-screen keyboard open on touch devices.
-    var finePointer =
-      !window.matchMedia || window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-
-    if (finePointer) {
-      // Focus the prompt on load so visitors can type right away.
-      input.focus({ preventScroll: true });
-
-      // Clicking anywhere that isn't interactive returns focus to the prompt.
-      document.addEventListener("click", function (e) {
-        var modal = document.getElementById("search-modal");
-        if (modal && !modal.hidden) return; // search modal owns focus while open
-        var t = e.target;
-        // leave links, buttons and form controls alone
-        if (t && t.closest &&
-            t.closest("a, button, input, textarea, select, label, summary, [contenteditable]")) {
-          return;
-        }
-        // don't steal focus mid text-selection (copying)
-        var sel = window.getSelection && window.getSelection();
-        if (sel && String(sel).length) return;
-        input.focus({ preventScroll: true });
+    if (openBtn) openBtn.addEventListener("click", open);
+    if (modal) {
+      modal.addEventListener("click", function (e) {
+        if (e.target && e.target.hasAttribute("data-close")) close();
       });
-    } else if (hint) {
-      // Touch devices: don't shove a keyboard at people who can't easily type
-      // commands. Point them at the tappable post list instead.
-      hint.textContent = "↓ tap a post below to read";
     }
   })();
 
   // ======================================================================
-  // Search modal (command palette)
+  // Header search
   // ======================================================================
   (function initSearch() {
-    var modal = document.getElementById("search-modal");
-    if (!modal) return;
-    var openBtn = document.getElementById("open-search");
-    var input = document.getElementById("m-input");
-    var typed = document.getElementById("m-typed");
-    var hint = document.getElementById("m-hint");
-    var resultsEl = document.getElementById("m-results");
+    var input = document.getElementById("h-input");
+    if (!input) return;
+    var field = document.getElementById("h-field");
+    var typed = document.getElementById("h-typed");
+    var hint = document.getElementById("h-hint");
+    var clearBtn = document.getElementById("h-clear");
+    var resultsEl = document.getElementById("h-results");
 
     var current = [];
     var selected = -1;
@@ -309,6 +304,7 @@
     function sync() {
       typed.textContent = input.value;
       if (hint) hint.style.display = input.value ? "none" : "";
+      if (clearBtn) clearBtn.hidden = input.value === "";
     }
 
     function render(list, q) {
@@ -350,9 +346,10 @@
     function refresh() {
       sync();
       var v = input.value.trim();
-      var list = v.length < 2 ? posts.slice() : search(v); // empty/1-char -> browse all
+      var list = v.length < 2 ? posts.slice(0, 5) : search(v);
       selected = list.length ? 0 : -1;
       render(list, v.length < 2 ? "" : v);
+      resultsEl.hidden = !document.activeElement || document.activeElement !== input;
     }
 
     function autocomplete() {
@@ -377,22 +374,39 @@
     }
 
     function open() {
-      if (!modal.hidden) return;
-      modal.hidden = false;
-      document.body.classList.add("modal-open");
-      input.value = "";
       refresh();
-      setTimeout(function () { input.focus({ preventScroll: true }); }, 0);
+      input.focus({ preventScroll: true });
     }
-    function close() {
-      modal.hidden = true;
-      document.body.classList.remove("modal-open");
+    function closeResults() {
+      resultsEl.hidden = true;
     }
-    openSearch = open; // expose to the header terminal ("/" on empty prompt)
+    openSearch = open;
 
     input.addEventListener("input", refresh);
+    input.addEventListener("focus", refresh);
+    input.addEventListener("blur", function () {
+      setTimeout(closeResults, 120);
+    });
+    if (clearBtn) {
+      clearBtn.addEventListener("mousedown", function (e) {
+        e.preventDefault();
+      });
+      clearBtn.addEventListener("click", function () {
+        input.value = "";
+        refresh();
+        input.focus({ preventScroll: true });
+      });
+    }
+    if (field) field.addEventListener("click", open);
     input.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") { e.preventDefault(); close(); return; }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        input.value = "";
+        sync();
+        closeResults();
+        input.blur();
+        return;
+      }
       if (e.key === "Tab") { e.preventDefault(); autocomplete(); return; }
       if (e.key === "Enter") {
         e.preventDefault();
@@ -411,18 +425,14 @@
       }
     });
 
-    if (openBtn) openBtn.addEventListener("click", open);
-    modal.addEventListener("click", function (e) {
-      if (e.target && e.target.hasAttribute("data-close")) close();
-    });
-
     function isTyping(e) {
       var t = e.target;
       var tag = (t && t.tagName) || "";
       return tag === "INPUT" || tag === "TEXTAREA" || (t && t.isContentEditable);
     }
     document.addEventListener("keydown", function (e) {
-      if (!modal.hidden) return;
+      var commandModal = document.getElementById("command-modal");
+      if (commandModal && !commandModal.hidden) return;
       if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
         e.preventDefault();
         open();

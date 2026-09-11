@@ -79,11 +79,14 @@ a:hover { color: var(--accent); text-decoration: underline; }
 
 .term-prompt .user { color: var(--accent); }
 .term-prompt .cwd { color: var(--link); }
-.term-static .cmd { margin-left: 0.4rem; }
 
 /* interactive terminal */
 .term-live { cursor: text; }
-.term-output { margin: 0 0 0.2rem; }
+.term-output {
+  max-height: 40vh;
+  margin: 0 0 0.2rem;
+  overflow-y: auto;
+}
 .term-out-line { white-space: pre-wrap; line-height: 1.5; }
 .term-out-line.echo { color: var(--fg-dim); }
 .term-out-line.err { color: var(--amber); }
@@ -153,6 +156,60 @@ a:hover { color: var(--accent); text-decoration: underline; }
   cursor: text;
 }
 
+.header-search {
+  position: relative;
+  margin-top: 0.4rem;
+}
+.search-field {
+  min-height: 2.35rem;
+  padding: 0.45rem 2.45rem 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  background: var(--bg-soft);
+}
+input[type="search"]::-webkit-search-cancel-button { appearance: none; }
+.search-clear {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  right: 0.55rem;
+  width: 1.45rem;
+  height: 1.45rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--fg-dim);
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+.search-clear:hover,
+.search-clear:focus-visible {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+  outline: none;
+}
+.search-clear[hidden] { display: none; }
+.header-results {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  max-height: min(24rem, 55vh);
+  overflow-y: auto;
+  margin: 0;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.42);
+}
+
 .cursor {
   display: inline-block;
   margin-left: 0.1rem;
@@ -170,7 +227,7 @@ a:hover { color: var(--accent); text-decoration: underline; }
 }
 /* terminal-style chips: green border, invert + glow on hover */
 .nav a,
-.nav-search {
+.nav-command {
   font: inherit;
   font-size: 0.95rem;
   line-height: 1;
@@ -184,19 +241,19 @@ a:hover { color: var(--accent); text-decoration: underline; }
   transition: color 0.12s, background 0.12s, box-shadow 0.12s;
 }
 .nav a:hover,
-.nav-search:hover,
+.nav-command:hover,
 .nav a:focus-visible,
-.nav-search:focus-visible {
+.nav-command:focus-visible {
   color: var(--bg);
   background: var(--accent);
   outline: none;
   box-shadow: 0 0 10px rgba(57, 255, 20, 0.35);
 }
-.no-js .nav-search { display: none; } /* needs JS — hide when unavailable */
+.no-js .nav-command { display: none; } /* needs JS — hide when unavailable */
 
 @media (prefers-reduced-motion: reduce) {
   .nav a,
-  .nav-search { transition: none; }
+  .nav-command { transition: none; }
 }
 
 /* layout: single column by default, main + sidebar on wide screens -------- */
@@ -281,7 +338,7 @@ a:hover { color: var(--accent); text-decoration: underline; }
 .pf-val a { color: var(--link); }
 .pf-val a:hover { color: var(--accent); }
 
-/* ---- search modal (command palette) ----------------------------------- */
+/* ---- command modal ----------------------------------------------------- */
 body.modal-open { overflow: hidden; }
 
 .modal {
@@ -346,13 +403,8 @@ body.modal-open { overflow: hidden; }
 .win-close:hover { color: var(--accent); border-color: var(--accent); }
 .win-body { padding: 0.85rem 0.9rem; }
 .win-body .term-field { font-size: 1.05rem; }
-.modal-results {
-  margin-top: 0.6rem;
-  max-height: 46vh;
-  overflow-y: auto;
-}
-.modal-results .r-empty { color: var(--fg-dim); cursor: default; }
-.modal-results .r-empty:hover { background: none; }
+.term-results .r-empty { color: var(--fg-dim); cursor: default; }
+.term-results .r-empty:hover { background: none; }
 .win-foot {
   padding: 0.45rem 0.9rem;
   border-top: 1px solid var(--border);
@@ -527,7 +579,7 @@ body.modal-open { overflow: hidden; }
 
   /* Roomier nav chips so they're easy to hit with a thumb. */
   .nav a,
-  .nav-search { padding: 0.6rem 1.05rem; }
+  .nav-command { padding: 0.6rem 1.05rem; }
 }
 
 /* phone widths: tighten margins, fit code/ASCII before sideways scroll --- */
@@ -535,7 +587,7 @@ body.modal-open { overflow: hidden; }
   body { padding: 1.25rem 1rem 3rem; }
   .ls-title { font-size: 1.1rem; }
   .nav a,
-  .nav-search { font-size: 1rem; }
+  .nav-command { font-size: 1rem; }
   .post-body pre { padding: 0.8rem; font-size: 0.82rem; }
 }
 

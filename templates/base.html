@@ -19,32 +19,22 @@
   <a class="skip" href="#main">skip to content</a>
   <header class="term-header">
     {{brand_html}}
-    <div id="terminal" class="terminal" data-author="{{author}}" data-resume="{{resume_url}}">
-      <!-- No-JS fallback: a completed command, not an empty input. -->
-      <div class="term-static">
-        <span class="term-prompt"><span class="user">{{author}}</span><span class="muted">@blog</span>:<span class="cwd">~</span><span class="muted">$</span></span>
-        <a class="cmd" href="/">cd ~</a>
+    <div id="terminal" data-author="{{author}}" data-resume="{{resume_url}}"></div>
+    <div class="header-search" id="header-search">
+      <div class="term-field search-field" id="h-field">
+        <span class="term-prompt"><span class="user">search</span><span class="muted">:~/posts$</span></span>
+        <span class="term-typed" id="h-typed"></span><span class="term-hint" id="h-hint">search here...</span><span class="cursor" aria-hidden="true">█</span>
+        <input id="h-input" class="term-input" type="search" aria-label="search posts"
+               autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <button type="button" class="search-clear" id="h-clear" aria-label="clear search" hidden>x</button>
       </div>
-
-      <!-- Interactive terminal (shown when JS is on). -->
-      <div class="term-live" id="term-live">
-        <div class="term-output" id="term-output" aria-live="polite"></div>
-        <div class="term-line">
-          <div class="term-field" id="term-field">
-            <span class="term-prompt"><span class="user">{{author}}</span><span class="muted">@blog</span>:<span class="cwd">~</span><span class="muted">$</span></span>
-            <span class="term-typed" id="term-typed"></span><span class="term-hint" id="term-hint">type 'help' and press enter to get started</span><span class="cursor" aria-hidden="true">█</span><span class="term-ghost" id="term-ghost" aria-hidden="true"></span>
-            <input id="term-input" class="term-input" type="text"
-                   aria-label="run a command"
-                   autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
-          </div>
-        </div>
-      </div>
+      <ul class="term-results header-results" id="h-results" role="listbox" hidden></ul>
     </div>
 
     <nav class="nav">
       <a href="/">posts</a>
       <a href="/about/">about</a>
-      <button type="button" class="nav-search" id="open-search" aria-haspopup="dialog">⌕ search</button>
+      <button type="button" class="nav-command" id="open-command" aria-haspopup="dialog">command</button>
     </nav>
   </header>
 
@@ -60,25 +50,30 @@
     <span class="links">{{footer_links}}</span>
   </footer>
 
-  <!-- Search modal (command palette). Opened by the nav button, "/", or ⌘/Ctrl+K. -->
-  <div class="modal" id="search-modal" hidden>
+  <!-- Command modal. Opened by the command button. -->
+  <div class="modal" id="command-modal" hidden>
     <div class="modal-backdrop" data-close></div>
-    <div class="modal-window" role="dialog" aria-modal="true" aria-label="search posts">
+    <div class="modal-window" role="dialog" aria-modal="true" aria-label="run a command">
       <div class="win-bar">
         <span class="win-dots"><i></i><i></i><i></i></span>
-        <span class="win-title">search — ~/posts</span>
-        <button type="button" class="win-close" data-close aria-label="close search">esc</button>
+        <span class="win-title">{{author}}@blog:~</span>
+        <button type="button" class="win-close" data-close aria-label="close command line">esc</button>
       </div>
       <div class="win-body">
-        <div class="term-field" id="m-field">
-          <span class="term-prompt"><span class="user">search</span><span class="muted">:~$</span></span>
-          <span class="term-typed" id="m-typed"></span><span class="term-hint" id="m-hint">type to find a post…</span><span class="cursor" aria-hidden="true">█</span>
-          <input id="m-input" class="term-input" type="text" aria-label="search posts"
-                 autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <div class="term-live" id="term-live">
+          <div class="term-output" id="term-output" aria-live="polite"></div>
+          <div class="term-line">
+            <div class="term-field" id="term-field">
+              <span class="term-prompt"><span class="user">{{author}}</span><span class="muted">@blog</span>:<span class="cwd">~</span><span class="muted">$</span></span>
+              <span class="term-typed" id="term-typed"></span><span class="term-hint" id="term-hint">type 'help' and press enter</span><span class="cursor" aria-hidden="true">█</span><span class="term-ghost" id="term-ghost" aria-hidden="true"></span>
+              <input id="term-input" class="term-input" type="text"
+                     aria-label="run a command"
+                     autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+            </div>
+          </div>
         </div>
-        <ul class="term-results modal-results" id="m-results" role="listbox"></ul>
       </div>
-      <div class="win-foot"><span class="muted">↑↓ navigate · ⇥ autocomplete · ↵ open · esc close</span></div>
+      <div class="win-foot"><span class="muted">tab completes · up/down history · enter runs · esc closes</span></div>
     </div>
   </div>
 
